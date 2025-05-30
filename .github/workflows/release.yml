@@ -183,6 +183,28 @@ jobs:
           corepack install
           corepack enable
 
+      - name: Patch basePath for standalone release (Linux)
+        if: ${{ matrix.name == 'linux' }}
+        shell: bash
+        run: |
+          sed -i "s,basePath: '',basePath: '/__PATH_PREFIX__',g" ./ui/next.config.js
+
+      - name: Patch basePath for standalone release (Windows)
+        if: ${{ matrix.name == 'win' }}
+        shell: pwsh
+        run: |
+          (Get-Content ./ui/next.config.js) -replace "basePath: ''", "basePath: '/__PATH_PREFIX__'" | Set-Content ./ui/next.config.js
+
+      - name: Rename env file for production (Linux)
+        if: ${{ matrix.name == 'linux' }}
+        shell: bash
+        run: mv ./ui/.env.docker ./ui/.env.production
+
+      - name: Rename env file for production (Windows)
+        if: ${{ matrix.name == 'win' }}
+        shell: pwsh
+        run: Rename-Item -Path ./ui/.env.docker -NewName .env.production
+
       - name: Install dependencies
         run: yarn install
 
